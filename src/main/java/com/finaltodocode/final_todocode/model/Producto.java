@@ -22,7 +22,7 @@ public class Producto {
     private Long codigoProducto;
     private String nombre;
     private String marca;
-    private Double precio;
+    private Double precio ;
     private Double cantidadDisponible;
 
     //Este atributo siempre irá en '0' dentro de la entidad, ya que sera usado en el json
@@ -30,6 +30,12 @@ public class Producto {
     private int cantidadAComprar;
 
 
+    public Producto(Long codigoProducto, String nombre, String marca, double precio, Double cantidadDisponible) {
+        this.codigoProducto = codigoProducto;
+        this.nombre= nombre;
+        this.marca = marca;
+        this.precio = precio;
+        this.cantidadDisponible= cantidadDisponible;
 
-
+    }
 }
