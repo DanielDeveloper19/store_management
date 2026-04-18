@@ -32,7 +32,7 @@ jobs:
           mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dspring.profiles.active=test \
           -Dsonar.projectKey=danieldeveloper19_storemanagement \
-          -Dsonar.organization=DanielDeveloper19 \
+          -Dsonar.organization=danieldeveloper19 \
           -Dsonar.host.url=https://sonarcloud.io
 
   # 3. SECURITY SCAN & DOCKER BUILD
