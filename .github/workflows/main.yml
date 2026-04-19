@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B clean verify jacoco:report sonar:sonar -Dspring.profiles.active=test \
+          mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dspring.profiles.active=test \
           -Dsonar.projectKey=danieldeveloper19_storemanagement \
           -Dsonar.organization=danieldeveloper19 \
