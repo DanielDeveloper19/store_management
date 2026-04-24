@@ -34,11 +34,20 @@ build/
 .vscode/
 
 ###Terraform ###
+# Ignorar el directorio de trabajo local de Terraform
 .terraform/
+
+# Ignorar archivos de estado local
 *.tfstate
 *.tfstate.backup
-.terraform.lock.hcl
+*.tfstate.lock.info
 
+# Ignorar archivos de variables con secretos
+*.tfvars
+*.tfvars.json
+
+# Ignorar registros de fallos
+crash.log
 
 # .gitignore
 
