@@ -80,15 +80,21 @@ jobs:
           docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
           docker push ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHA_SHORT }}
 
-      - name: Update Helm Values
+      - name: Update Helm Values in External Repo
+        env:
+          # Use your PAT here
+          API_TOKEN_GITHUB: ${{ secrets.MY_PAT }}
         run: |
-          # Use sed to update the tag value in your values.yaml
-          # This assumes your values.yaml has a line like 'tag: "something"'
-          sed -i "s/tag: .*/tag: \"${{ steps.vars.outputs.SHA_SHORT }}\"/" helm/grade-submission/values.yaml
+          # 1. Clone the Helm repository
+          git clone https://x-access-token:${API_TOKEN_GITHUB}@github.com/DanielDeveloper19/Store_Management_KubernetesManifests.git
           
-          # Commit the change back to the repository
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add helm/grade-submission/values.yaml
-          git commit -m "chore: update image tag to ${{ steps.vars.outputs.SHA_SHORT }} [skip ci]"
+          # 2. Navigate to the cloned folder and update the values.yaml
+          cd Store_Management_KubernetesManifests
+          sed -i "s/tag: .*/tag: \"${{ steps.vars.outputs.SHA_SHORT }}\"/" storeManagement_chart/values.yaml
+          
+          # 3. Commit and push the changes back to the Helm repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add storeManagement_chart/values.yaml
+          git commit -m "Update image tag to ${{ steps.vars.outputs.SHA_SHORT }}"
           git push
