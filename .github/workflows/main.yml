@@ -51,14 +51,19 @@ jobs:
       - name: Set Image Name to Lowercase
         run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      # Now use ${{ env.IMAGE_NAME }} instead of github.repository
+      - name: Set Short SHA
+        id: vars
+        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build Docker Image
-        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}:latest .
+        run: |
+          docker build -t ghcr.io/${{ env.IMAGE_NAME }}:latest .
+          docker build -t ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHA_SHORT }} .
 
       - name: Trivy Security Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'ghcr.io/${{ env.IMAGE_NAME }}:latest'
+          image-ref: 'ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHA_SHORT }}'
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
@@ -71,4 +76,25 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to GHCR
-        run: docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
+        run: |
+          docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
+          docker push ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHA_SHORT }}
+
+      - name: Update Helm Values in External Repo
+        env:
+          # Use your PAT here
+          API_TOKEN_GITHUB: ${{ secrets.MY_PAT }}
+        run: |
+          # 1. Clone the Helm repository
+          git clone https://x-access-token:${API_TOKEN_GITHUB}@github.com/DanielDeveloper19/Store_Management_KubernetesManifests.git
+          
+          # 2. Navigate to the cloned folder and update the values.yaml
+          cd Store_Management_KubernetesManifests
+          sed -i "s/tag: .*/tag: \"${{ steps.vars.outputs.SHA_SHORT }}\"/" storeManagement_chart/values.yaml
+          
+          # 3. Commit and push the changes back to the Helm repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add storeManagement_chart/values.yaml
+          git commit -m "Update image tag to ${{ steps.vars.outputs.SHA_SHORT }}"
+          git push
